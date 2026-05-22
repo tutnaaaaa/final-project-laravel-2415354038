@@ -62,4 +62,59 @@ class CustomerController extends Controller
             "data" => $customer
         ]);
     }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $customer = Customer::find($id);
+
+        if (!$customer) {
+            return response()->json([
+                "success" => false,
+                "message" => "Customer not found",
+            ], 404);
+        }
+
+        $data = $request->validate([
+            "name" => ["sometimes", "string", "max:255"],
+            "email" => ["sometimes", "email", "unique:customers,email," . $id],
+            "phone" => ["nullable", "string"],
+            "address" => ["nullable", "string"],
+            "status" => ["nullable", "boolean"],
+        ]);
+
+        $customer->update($data);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Customer updated successfully",
+            "data" => $customer
+        ]);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $customer = Customer::find($id);
+
+        if (!$customer) {
+            return response()->json([
+                "success" => false,
+                "message" => "Customer not found",
+            ], 404);
+        }
+
+        if ($customer->subscriptions()->exists()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Customer cannot be deleted because they have active subscriptions",
+            ], 422);
+        }
+
+        $customer->delete();
+
+        return response()->json([
+            "success" => true,
+            "message" => "Customer deleted successfully",
+            "data" => null
+        ]);
+    }
 }
