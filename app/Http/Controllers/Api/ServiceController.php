@@ -115,7 +115,6 @@ class ServiceController extends Controller
             ], 404);
         }
 
-        // Cek relasi subscription (Akan berfungsi setelah tabel subscription dibuat)
         if ($serviceModel->subscriptions()->exists()) {
             return response()->json([
                 "success" => false,
